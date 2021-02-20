@@ -1,7 +1,7 @@
 <template>
   <q-page class="column q-pa-lg no-scroll window-height no-wrap">
     <div class="row full-width q-col-gutter-md justify-center">
-      here is the text we want to scroll {{ speed }}
+      here is the text we want to scroll
       <q-input
         v-model="text"
         class="full-width full-height"
@@ -18,6 +18,7 @@
       />
     </div>
     <div
+      id="prompt"
       ref="prompt"
       style="padding-bottom: 24px;"
       class="full-height overflow-auto text-h3 row q-mt-xl justify-center"
@@ -28,14 +29,17 @@
 </template>
 
 <script>
+import { gsap } from "gsap";
+import ScrollToPlugin from "gsap/ScrollToPlugin";
 import text from "../assets/text.js";
+gsap.registerPlugin(ScrollToPlugin);
 
 export default {
   name: "PageIndex",
   data() {
     return {
       scrollingInterval: null,
-      speed: 1,
+      speed: 4,
       text
     };
   },
@@ -46,11 +50,11 @@ export default {
     onKeyPress(e) {
       const keyPressed = e.code;
       if (keyPressed === "ArrowUp") {
-        this.speed = this.speed - 5 > 0 ? this.speed - 5 : 1;
+        this.speed += 1;
       }
 
       if (keyPressed === "ArrowDown") {
-        this.speed += 5;
+        this.speed = this.speed - 1 > 0 ? this.speed - 1 : 1;
       }
 
       if (keyPressed === "ArrowUp" || keyPressed === "ArrowDown") {
@@ -65,7 +69,7 @@ export default {
         clearInterval(this.scrollingInterval);
         this.scrollingInterval = null;
       } else {
-        this.scrollingInterval = setInterval(this.scroll, this.speed);
+        this.scrollingInterval = setInterval(this.scroll, 20);
       }
     },
     scroll() {
@@ -75,8 +79,10 @@ export default {
       ) {
         this.$refs.prompt.scroll(0, 0);
       } else {
-        this.$refs.prompt.scroll({
-          top: this.$refs.prompt.scrollTop + 1
+        const d = document.getElementById("prompt");
+        gsap.to(d, {
+          duration: 0.01,
+          scrollTo: { y: this.$refs.prompt.scrollTop + this.speed, x: 0 }
         });
       }
     }
